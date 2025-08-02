@@ -1,10 +1,49 @@
 import { useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import getAxiosClient from "../axios-instance";
+// is .js required for the axios import above
 
 export default function Todos(){
+
   const modalRef = useRef();
-  const toggleNewTodoModal = () => {
+
+  const queryClient = useQueryClient();
+
+  const { mutate: createNewTodo } = useMutation({
+	  // The key used to identify this mutation in React Query's cache
+	  mutationKey: ["newTodo"],
+	
+	  // The function that performs the mutation (i.e., creating a new to-do)
+	  mutationFn: async (newTodo) => {
+	    const axiosInstance = await getAxiosClient();
+	
+	    // Use the Axios instance to make a POST request to the server, sending the new to-do data
+	    const { data } = await axiosInstance.post("http://localhost:8080/todos", newTodo);
+	
+	    // Return the response data (e.g., the newly created to-do object)
+	    return data;
+	  },
+	//removed onSuccess here
+  });
+
+  const { data, isError, isLoading } = useQuery({
+    // A unique key to identify this query in React Query's cache
+    queryKey: ["todos"],
+
+    // The function responsible for fetching the data
+    queryFn: async () => {
+      const axiosInstance = await getAxiosClient();
+
+      // Use the Axios instance to send a GET request to fetch the list of todos
+      const { data } = await axiosInstance.get("http://localhost:8080/todos");
+
+      //Return the fetched data (React Query will cache it under the queryKey)
+      return data;
+    }
+  });
+
+  function toggleNewTodoModal(){
   // Check if the modal is currently open by accessing the `open` property of `modalRef`.
     if (modalRef.current.open) {
       // If the modal is open, close it by calling the `close()` method.
@@ -14,6 +53,8 @@ export default function Todos(){
       modalRef.current.showModal();
     }
   }
+
+
   function NewTodoButton (){
     return (
       <button className="btn btn-primary" onClick={toggleNewTodoModal}>
@@ -48,6 +89,49 @@ export default function Todos(){
       </dialog>
 )
   }
+
+
+function TodoItemList(){
+  return (
+    <div className="w-lg h-sm flex column items-center justify-center gap-4">
+      {data.success && data.todos && data.todos.length >= 1 ? (
+        <ul className="flex column items-center justify-center gap-4">
+          {
+            data.todos.map(todo => (
+              <li key={todo.id} className="inline-flex items-center gap-4">
+                <div className="w-md">
+                  <h3 className="text-lg">
+                    {todo.name}
+                  </h3>
+                  <p className="text-sm">{todo.description}</p>
+                </div>
+                <div className="w-md">
+                  <label className="swap">
+                    <input type="checkbox" onClick={() => markAsCompleted(todo.id)} />
+                    <div className="swap-on">
+                      Yes
+                    </div>
+                    <div className="swap-off">
+                      No
+                    </div>
+                  </label>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+      ) : (
+        <div className="text-center">
+          <h3 className="text-lg font-semibold mb-2">No todos yet!</h3>
+          <p className="text-sm text-gray-500">Create your first todo to get started.</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+
+
   const { register, handleSubmit } = useForm({ 
     defaultValues: { 
       name: "", 
@@ -56,14 +140,28 @@ export default function Todos(){
   });
 
   const handleNewTodo = (values) => {
+    console.log(values) //debug log
+    createNewTodo(values);
     toggleNewTodoModal();
   }
 
+    if(isLoading){
+    return (
+      <div>Loading Todos...</div>
+    )
+  }
   
+  if(isError){
+    return (
+      <div>There was an error</div>
+    )
+  }
   
   return (
     <>
       <NewTodoButton/>
+      <TodoItemList/>
+      <TodoModal/>
     </>
   )
 }

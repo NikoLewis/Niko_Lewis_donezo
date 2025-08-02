@@ -25,7 +25,8 @@ export default function ProtectedRoute({ children }){
     }, []);
 
     if(!isSessionChecked){
-    return <div>Loading...</div>
+        // add () to <div> below to see if it's cause of authorization error I'm getting at testing aka step 61
+        return (<div>Loading...</div>)
     } else {
     return (
       <>{session ? children : <Navigate to="/login" />}</>
