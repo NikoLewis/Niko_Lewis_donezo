@@ -27,6 +27,20 @@ export default function Todos(){
 	//removed onSuccess here
   });
 
+  const { mutate: markAsCompleted } = useMutation({
+  mutationKey: ["markAsCompleted"],
+  mutationFn: async (todoId) => {
+   const axiosInstance = await getAxiosClient(); 
+
+    const { data } = await axiosInstance.put(`http://localhost:8080/todos/${todoId}/completed`);
+
+    return data;
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries("todos");
+  }
+});
+
   const { data, isError, isLoading } = useQuery({
     // A unique key to identify this query in React Query's cache
     queryKey: ["todos"],
