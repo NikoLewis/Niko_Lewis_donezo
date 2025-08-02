@@ -120,15 +120,18 @@ function TodoItemList(){
                   <p className="text-sm">{todo.description}</p>
                 </div>
                 <div className="w-md">
+                 
                   <label className="swap">
-                    <input type="checkbox" onClick={() => markAsCompleted(todo.id)} />
-                    <div className="swap-on">
-                      Yes
-                    </div>
-                    <div className="swap-off">
-                      No
-                    </div>
+                    <input 
+                      type="checkbox" 
+                      // Reflects current state
+                      checked={todo.completed || false}  
+                      onChange={() => markAsCompleted(todo.id)}  
+                    />
+                    <div className="swap-on">✓ Done</div>     // More descriptive text
+                    <div className="swap-off">○ Todo</div>    // More descriptive text
                   </label>
+
                 </div>
               </li>
             ))
