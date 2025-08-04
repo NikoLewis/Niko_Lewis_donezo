@@ -128,8 +128,8 @@ function TodoItemList(){
                       checked={todo.completed || false}  
                       onChange={() => markAsCompleted(todo.id)}  
                     />
-                    <div className="swap-on">✓ Done</div>     // More descriptive text
-                    <div className="swap-off">○ Todo</div>    // More descriptive text
+                    <div className="swap-on">✓ Done</div>     
+                    <div className="swap-off">○ Todo</div>    
                   </label>
 
                 </div>
